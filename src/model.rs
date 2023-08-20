@@ -13,11 +13,6 @@ impl Choice {
             Button::Red => self.n_red += 1,
         }
     }
-
-    pub fn percent(self) -> f64 {
-        let total = self.n_blu + self.n_red;
-        self.n_red as f64 / total as f64
-    }
 }
 
 pub enum Button {

@@ -6,14 +6,12 @@ fn main() {
 
     let actors: Vec<Actor> = model::spawn_random_actors().take(300).collect();
     let mut choices = vec![];
-    for _ in 0..400 {
+    for _ in 0..200 {
         let mut c = Choice::default();
         for actor in &actors {
             let button = actor.select_button();
             c.push(button);
         }
-
-        //
 
         choices.push(c);
     }
