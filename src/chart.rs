@@ -22,7 +22,7 @@ pub fn render(data: Vec<Choice>) {
     });
 
     let chart = Chart::new()
-        .background_color(Color::from("#323558"))
+        .background_color(Color::from("#3b303c"))
         .color(vec![Color::from("#f85d80"), Color::from("#318eb8")])
         .title(Title::new().text("Population").right(160).top(20))
         .tooltip(Tooltip::new().trigger(Trigger::Axis))
@@ -52,7 +52,7 @@ pub fn render(data: Vec<Choice>) {
                     Emphasis::new().item_style(ItemStyle::new().color(Color::from("#9f3b52"))),
                 )
                 .show_symbol(false)
-                .stack("Total")
+                .stack("x")
                 .line_style(LineStyle::new().width(0.))
                 .area_style(AreaStyle::new().color(Color::LinearGradient {
                     x: 0.,
@@ -70,7 +70,7 @@ pub fn render(data: Vec<Choice>) {
                     Emphasis::new().item_style(ItemStyle::new().color(Color::from("#25466b"))),
                 )
                 .show_symbol(false)
-                .stack("Total")
+                .stack("x")
                 .line_style(LineStyle::new().width(0.))
                 .area_style(AreaStyle::new().color(Color::LinearGradient {
                     x: 0.,
@@ -82,7 +82,7 @@ pub fn render(data: Vec<Choice>) {
                 .data(blue_list),
         );
 
-    HtmlRenderer::new("Evolution", 1200, 800)
+    HtmlRenderer::new("Evolution", 1400, 800)
         .theme(Theme::Dark)
         .save(&chart, "out.html")
         .expect("render html");
