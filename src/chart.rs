@@ -1,20 +1,23 @@
-use charming::{
-    component::{Axis, Title, VisualMap, VisualMapType},
-    element::{TextStyle, Tooltip, Trigger},
-    series::Line,
-    theme::Theme,
-    Chart, HtmlRenderer,
+use {
+    crate::model::Choice,
+    charming::{
+        component::{Axis, Title, VisualMap, VisualMapType},
+        element::{TextStyle, Tooltip, Trigger},
+        series::Line,
+        theme::Theme,
+        Chart, HtmlRenderer,
+    },
 };
 
-pub fn render(data: Vec<u32>) {
+pub fn render(data: Vec<Choice>) {
     let mut data_list = vec![];
     let mut value_list = vec![];
 
     let mut counter = 0;
-    data.into_iter().for_each(|value| {
+    data.iter().for_each(|value| {
         counter += 1;
         data_list.push(counter.to_string());
-        value_list.push(value as f64 / 400.);
+        value_list.push(value.percent());
     });
 
     let chart = Chart::new()
@@ -32,13 +35,17 @@ pub fn render(data: Vec<u32>) {
             Axis::new()
                 .name("Generation")
                 .name_text_style(TextStyle::new().font_size(18))
-                .data(data_list),
+                .data(data_list)
+                .min(0)
+                .max(data.len() as i32),
         )
         .y_axis(
             Axis::new()
                 .name("Choice")
                 .name_text_style(TextStyle::new().font_size(18))
-                .interval(0.1),
+                .interval(0.1)
+                .min(0.)
+                .max(1.),
         )
         .series(Line::new().show_symbol(false).data(value_list));
 
