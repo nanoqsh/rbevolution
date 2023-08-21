@@ -26,24 +26,24 @@ pub enum Button {
     Red,
 }
 
-pub struct Actor {
+struct Actor {
     dna: f64,
     lifetime: u32,
 }
 
 impl Actor {
     const LIFETIME: u32 = 50;
-    const VARIATION_COEFFICIENT: f64 = 0.07;
-    const FERTILITY: f64 = 0.03;
+    const VARIATION_COEFFICIENT: f64 = 0.05;
+    const FERTILITY: f64 = 0.028;
 
-    pub fn new(dna: f64) -> Self {
+    fn new(dna: f64) -> Self {
         Self {
             dna,
             lifetime: Self::LIFETIME,
         }
     }
 
-    pub fn breed(&self) -> Option<Self> {
+    fn breed(&self) -> Option<Self> {
         let f: f64 = rand::thread_rng().gen(); // generates [0, 1)
         if f > Self::FERTILITY {
             return None;
@@ -55,7 +55,7 @@ impl Actor {
         Some(Self::new(v.clamp(0., 1.)))
     }
 
-    pub fn select_button(&self) -> Button {
+    fn select_button(&self) -> Button {
         let r: f64 = rand::thread_rng().gen(); // generates [0, 1)
 
         // [0, f) - red
@@ -67,13 +67,13 @@ impl Actor {
         }
     }
 
-    pub fn life(&mut self) -> bool {
+    fn life(&mut self) -> bool {
         self.lifetime -= 1;
         self.lifetime != 0
     }
 }
 
-pub fn spawn_random_actors() -> impl Iterator<Item = Actor> {
+fn spawn_random_actors() -> impl Iterator<Item = Actor> {
     use std::iter;
 
     let mut rng = rand::thread_rng();
@@ -81,4 +81,60 @@ pub fn spawn_random_actors() -> impl Iterator<Item = Actor> {
         let f = rng.sample(Open01); // generates (0, 1)
         Actor::new(f)
     })
+}
+
+pub struct Population {
+    actors: Vec<(Actor, Button)>,
+}
+
+impl Population {
+    pub fn start(n: usize) -> Self {
+        Self {
+            actors: spawn_random_actors()
+                .take(n)
+                .map(|a| (a, Button::default()))
+                .collect(),
+        }
+    }
+
+    pub fn select(&mut self) -> impl Iterator<Item = Button> + '_ {
+        self.actors.iter_mut().map(|(a, c)| {
+            let button = a.select_button();
+            *c = button;
+            button
+        })
+    }
+
+    pub fn kill_blues(&mut self) {
+        const CHANCE: f64 = 0.1;
+
+        let f: f64 = rand::thread_rng().gen(); // generates [0, 1)
+        self.actors.retain(|&(_, button)| {
+            if button == Button::Blue {
+                f >= CHANCE
+            } else {
+                true
+            }
+        })
+    }
+
+    pub fn life(&mut self) {
+        self.actors.retain_mut(|(actor, _)| actor.life())
+    }
+
+    pub fn breed(&mut self) {
+        const MAX_POPULATION: usize = 800;
+
+        let mut brood = vec![];
+        for (actor, _) in &self.actors {
+            if brood.len() + self.actors.len() >= MAX_POPULATION {
+                break;
+            }
+
+            brood.extend(actor.breed());
+        }
+
+        self.actors
+            .extend(brood.into_iter().map(|a| (a, Button::default())));
+    }
 }
