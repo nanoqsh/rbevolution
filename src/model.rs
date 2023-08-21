@@ -106,12 +106,12 @@ impl Population {
     }
 
     pub fn kill_blues(&mut self) {
-        const CHANCE: f64 = 0.1;
+        const NTH: usize = 9;
 
-        let f: f64 = rand::thread_rng().gen(); // generates [0, 1)
+        let mut ev = EveryNth::new(NTH);
         self.actors.retain(|&(_, button)| {
             if button == Button::Blue {
-                f >= CHANCE
+                !ev.next()
             } else {
                 true
             }
@@ -136,5 +136,60 @@ impl Population {
 
         self.actors
             .extend(brood.into_iter().map(|a| (a, Button::default())));
+    }
+}
+
+struct EveryNth {
+    c: usize,
+    n: usize,
+}
+
+impl EveryNth {
+    fn new(n: usize) -> Self {
+        Self { c: 0, n }
+    }
+
+    fn next(&mut self) -> bool {
+        if self.c == self.n {
+            self.c = 0;
+            true
+        } else {
+            self.c += 1;
+            false
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn every0() {
+        let mut ev = EveryNth::new(0);
+        assert!(ev.next());
+        assert!(ev.next());
+        assert!(ev.next());
+        assert!(ev.next());
+    }
+
+    #[test]
+    fn every1() {
+        let mut ev = EveryNth::new(1);
+        assert!(!ev.next());
+        assert!(ev.next());
+        assert!(!ev.next());
+        assert!(ev.next());
+    }
+
+    #[test]
+    fn every2() {
+        let mut ev = EveryNth::new(2);
+        assert!(!ev.next());
+        assert!(!ev.next());
+        assert!(ev.next());
+        assert!(!ev.next());
+        assert!(!ev.next());
+        assert!(ev.next());
     }
 }
